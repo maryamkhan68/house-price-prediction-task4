@@ -70,32 +70,33 @@ This project takes real-world housing data, processes it, trains and compares mu
 
 ## Project Structure
 
+```
 house-price-prediction-task4/
 ├── app/
-│ ├── app.py # Streamlit application
-│ └── requirements.txt # Dependencies (used by Streamlit Cloud deployment)
+│   ├── app.py                  # Streamlit application
+│   └── requirements.txt        # Dependencies (used by Streamlit Cloud deployment)
 ├── data/
-│ ├── train.csv
-│ ├── test.csv
-│ ├── data_description.txt
-│ └── processed_train.csv
+│   ├── train.csv
+│   ├── test.csv
+│   ├── data_description.txt
+│   └── processed_train.csv
 ├── models/
-│ ├── final_model.pkl # Tuned Gradient Boosting model (final)
-│ ├── all_models.pkl # All 4 trained models (for model selection feature)
-│ ├── scaler.pkl
-│ ├── cols_to_scale.pkl
-│ ├── feature_columns.pkl
-│ └── feature_defaults.pkl
+│   ├── final_model.pkl         # Tuned Gradient Boosting model (final)
+│   ├── all_models.pkl          # All 4 trained models (for model selection feature)
+│   ├── scaler.pkl
+│   ├── cols_to_scale.pkl
+│   ├── feature_columns.pkl
+│   └── feature_defaults.pkl
 ├── notebooks/
-│ └── Task_04_ML.ipynb # Full data processing & model development notebook
+│   └── Task_04_ML.ipynb        # Full data processing & model development notebook
 ├── report/
-│ └── Task4_Report.pdf
-├── generate_defaults.py # Generates default feature values for the app's input form
-├── retrain_local.py # Retrains and saves the final model locally
-├── save_all_models.py # Trains and saves all 4 models for model selection
+│   └── Task4_Report.pdf
+├── generate_defaults.py        # Generates default feature values for the app's input form
+├── retrain_local.py            # Retrains and saves the final model locally
+├── save_all_models.py          # Trains and saves all 4 models for model selection
 ├── .gitignore
 └── README.md
-
+```
 
 ---
 
