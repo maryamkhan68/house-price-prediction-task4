@@ -3,6 +3,13 @@ import pandas as pd
 import numpy as np
 import joblib
 import matplotlib.pyplot as plt
+import os
+
+# Anchor all file paths to this file's own location, so loading works
+# the same whether run locally (cd app && streamlit run app.py) or on
+# Streamlit Cloud (which uses the repo root as the working directory, not the app/ folder).
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(APP_DIR)
 
 # --- Page configuration (must be the first Streamlit command) ---
 st.set_page_config(
@@ -11,11 +18,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Session state defaults ---
 if "theme" not in st.session_state:
     st.session_state.theme = "Light"
 
-# --- Elegant font import ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Poppins:wght@300;400;500&display=swap');
@@ -24,7 +29,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Top bar: appearance selector on the right ---
 top_left, top_right = st.columns([5, 1])
 with top_right:
     theme_choice = st.selectbox(
@@ -37,7 +41,6 @@ with top_right:
 
 IS_DARK = st.session_state.theme == "Dark"
 
-# --- Elegant color palette used consistently across every chart ---
 PALETTE = ["#B08968", "#7D8570", "#9A8C98", "#C9A987", "#4A4E69", "#A5A58D"]
 ACCENT = "#B08968"
 POSITIVE = "#7D8570"
@@ -49,7 +52,6 @@ GRID_COLOR = "#2c2f38" if IS_DARK else "#e6e2dc"
 CARD_BG = "#1c2129" if IS_DARK else "#f7f4f0"
 
 def style_fig(fig, ax_list=None):
-    """Apply a consistent, elegant, theme-aware style to any matplotlib figure."""
     fig.patch.set_facecolor(BG_COLOR)
     axes = ax_list if ax_list else fig.get_axes()
     for ax in axes:
@@ -67,66 +69,43 @@ def style_fig(fig, ax_list=None):
     fig.tight_layout()
     return fig
 
-# --- Theme CSS: page background, widget labels, metrics, dropdowns, and NATIVE TABS ---
-# Everything here lives in the SAME document as the rest of the app (no iframe),
-# so it reliably follows Light/Dark in every browser.
 st.markdown(f"""
     <style>
     .stApp {{ background-color: {BG_COLOR}; color: {TEXT_COLOR}; }}
     [data-testid="stMarkdownContainer"], label, p, span, h1, h2, h3, h4 {{ color: {TEXT_COLOR} !important; }}
     .stMetric, div[data-testid="stMetric"] {{ background-color: {CARD_BG}; border-radius: 8px; padding: 10px; }}
-
-    /* Dropdowns (selectbox) */
     div[data-baseweb="select"] > div {{ background-color: {CARD_BG} !important; color: {TEXT_COLOR} !important; border-color: {GRID_COLOR} !important; }}
     div[data-baseweb="popover"] div {{ background-color: {CARD_BG} !important; color: {TEXT_COLOR} !important; }}
     li[role="option"] {{ background-color: {CARD_BG} !important; color: {TEXT_COLOR} !important; }}
-
-    /* Number inputs */
     div[data-testid="stNumberInput"] input {{ background-color: {CARD_BG} !important; color: {TEXT_COLOR} !important; }}
-
-    /* --- Native tabs styled as an elegant horizontal navbar --- */
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 36px;
-        border-bottom: 1px solid {GRID_COLOR};
-        justify-content: center;
-    }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 36px; border-bottom: 1px solid {GRID_COLOR}; justify-content: center; }}
     .stTabs [data-baseweb="tab"] {{
-        height: 44px;
-        background-color: transparent;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        font-weight: 400;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: {TEXT_COLOR};
-        border-bottom: 2px solid transparent;
+        height: 44px; background-color: transparent; font-family: 'Poppins', sans-serif;
+        font-size: 14px; font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase;
+        color: {TEXT_COLOR}; border-bottom: 2px solid transparent;
     }}
     .stTabs [aria-selected="true"] {{
-        color: {TEXT_COLOR} !important;
-        border-bottom: 2px solid {TEXT_COLOR} !important;
-        font-weight: 500;
-        background-color: transparent !important;
+        color: {TEXT_COLOR} !important; border-bottom: 2px solid {TEXT_COLOR} !important;
+        font-weight: 500; background-color: transparent !important;
     }}
     .stTabs [data-baseweb="tab-highlight"] {{ background-color: transparent; }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- Load saved model artifacts ---
 @st.cache_resource
 def load_artifacts():
-    model = joblib.load("../models/final_model.pkl")
-    scaler = joblib.load("../models/scaler.pkl")
-    cols_to_scale = joblib.load("../models/cols_to_scale.pkl")
-    feature_columns = joblib.load("../models/feature_columns.pkl")
-    all_models = joblib.load("../models/all_models.pkl")
+    model = joblib.load(os.path.join(ROOT_DIR, "models", "final_model.pkl"))
+    scaler = joblib.load(os.path.join(ROOT_DIR, "models", "scaler.pkl"))
+    cols_to_scale = joblib.load(os.path.join(ROOT_DIR, "models", "cols_to_scale.pkl"))
+    feature_columns = joblib.load(os.path.join(ROOT_DIR, "models", "feature_columns.pkl"))
+    all_models = joblib.load(os.path.join(ROOT_DIR, "models", "all_models.pkl"))
     return model, scaler, cols_to_scale, feature_columns, all_models
 
 model, scaler, cols_to_scale, feature_columns, all_models = load_artifacts()
 
-# --- Load raw data once, for the Data Insights page ---
 @st.cache_data
 def load_raw_data():
-    return pd.read_csv("../data/train.csv")
+    return pd.read_csv(os.path.join(ROOT_DIR, "data", "train.csv"))
 
 raw_df = load_raw_data()
 
@@ -134,14 +113,9 @@ st.markdown(f"<h1 style='text-align:center; margin-top: 10px; color:{TEXT_COLOR}
 st.markdown(f"<p style='text-align:center; color:{'#bbb' if IS_DARK else '#777'};'>Powered by a tuned Gradient Boosting model trained on real Ames, Iowa housing data.</p>", unsafe_allow_html=True)
 st.divider()
 
-# --- Native tabs: same document as everything else, so theming always applies ---
 tab_predict, tab_insights, tab_performance = st.tabs(["🔮  PREDICT PRICE", "📊  DATA INSIGHTS", "📈  MODEL PERFORMANCE"])
 
-# =====================================================================
-# TAB 1: PREDICT PRICE
-# =====================================================================
 with tab_predict:
-
     st.header("📋 Enter House Details")
 
     selected_model_name = st.selectbox(
@@ -189,7 +163,7 @@ with tab_predict:
     predict_button = st.button("🔮 Predict Price", type="primary", use_container_width=True)
 
     if predict_button:
-        defaults = joblib.load("../models/feature_defaults.pkl")
+        defaults = joblib.load(os.path.join(ROOT_DIR, "models", "feature_defaults.pkl"))
         input_row = defaults.copy()
 
         input_row["GrLivArea"] = gr_liv_area
@@ -282,11 +256,7 @@ with tab_predict:
             st.caption("Linear models show coefficients instead of tree-based feature importance — "
                        "a positive coefficient increases predicted price, negative decreases it.")
 
-# =====================================================================
-# TAB 2: DATA INSIGHTS
-# =====================================================================
 with tab_insights:
-
     st.header("📊 Data Insights")
     st.markdown("Exploring patterns in the training data used to build this model.")
 
@@ -328,11 +298,7 @@ with tab_insights:
     style_fig(fig, [ax])
     st.pyplot(fig)
 
-# =====================================================================
-# TAB 3: MODEL PERFORMANCE
-# =====================================================================
 with tab_performance:
-
     st.header("📈 Model Performance")
     st.markdown("Comparison of all models trained during development.")
 
